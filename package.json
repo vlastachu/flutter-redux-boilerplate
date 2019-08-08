@@ -3,7 +3,8 @@
 	"displayName": "Flutter redux boilerplate",
 	"description": "boilerplate generator",
 	"version": "0.0.1",
-  "license": "MIT",
+	"license": "MIT",
+	"repository": "https://github.com/vlastachu/flutter-redux-boilerplate",
 	"engines": {
 		"vscode": "^1.36.0"
 	},
