@@ -23,7 +23,7 @@ export function actionTemplate(info: BoilerplateInfo): string {
       ${
         info.actions.map(([name, optionalArgumentType]) => {
           if (optionalArgumentType) {
-            let argName = camelCase(optionalArgumentType);
+            let argName = camelCase(optionalArgumentType, true);
             return `
             static Action ${name}Action(${optionalArgumentType} ${argName}) {
               return Action(${info.capitalized}Action.${name}, payload: ${argName});
@@ -98,7 +98,7 @@ export function effectTemplate(info: BoilerplateInfo): string {
         void _${name}(Action action, Context<${info.capitalized}State> ctx) {
           ${
             optionalArgumentType ? `
-            final ${optionalArgumentType} ${camelCase(optionalArgumentType)} = action.payload;
+            final ${optionalArgumentType} ${camelCase(optionalArgumentType, true)} = action.payload;
             ` : ""
           }
           // TODO Remove or rewrite code over generated effect
@@ -128,7 +128,7 @@ export function reducerTemplate(info: BoilerplateInfo): string {
       ${info.capitalized}State _${name}Reducer(${info.capitalized}State state, Action action) {
           ${
             optionalArgumentType ? `
-            final ${optionalArgumentType} ${camelCase(optionalArgumentType)} = action.payload;
+            final ${optionalArgumentType} ${camelCase(optionalArgumentType, true)} = action.payload;
             ` : ""
           }
           // TODO Remove or rewrite code over generated reducer
@@ -190,8 +190,14 @@ export function pageTemplate(info: BoilerplateInfo): string {
   `;
 }
 
-function camelCase(s: string): string {
-  return s.replace(/(\W\w)/ig, ($1) => {
+function camelCase(s: string, forceChangeName = false): string {
+  var res = s.replace(/([_-\W]\w)/ig, ($1) => {
     return $1.slice(1).toUpperCase();
   }).replace(/(\W)/ig, '');
+  res = res.charAt(0).toLowerCase() + res.slice(1);
+  if (forceChangeName && res.valueOf() === s.valueOf()) {
+    return '_' + res;
+  } else {
+    return res;
+  }
 }

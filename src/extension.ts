@@ -12,8 +12,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposable = vscode.commands.registerCommand('flutterReduxBoilerplate.generate', async () => {
 		let defaultPath = await getDefaultPath();
 		let selectedFilePath = await vscode.window.showInputBox({
-      prompt: 'Type the path where new folder will be created:',
-      value: defaultPath,
+			prompt: 'Type the path where new folder will be created:',
+			value: defaultPath,
 			valueSelection: [
 				defaultPath.lastIndexOf(path.sep) + 1,
 				defaultPath.length
@@ -24,9 +24,10 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		let componentName = await vscode.window.showInputBox({
-      prompt: "Type the name for new component",
+			prompt: "Type the name for new component",
 			value: "",
 			placeHolder: "name_in_snake_case",
+			ignoreFocusOut: true,
 		});
 		if (componentName === undefined) {
 			return;
@@ -34,18 +35,20 @@ export function activate(context: vscode.ExtensionContext) {
 		let componentFolder = path.join(selectedFilePath, componentName || "/");
 
 		let actionsStr = await vscode.window.showInputBox({
-      prompt: "Type actions and optionnaly payload type",
+			prompt: "Type actions and optionnaly payload type",
 			value: "",
 			placeHolder: "clear, addAll: List<Item>, add: Item",
+			ignoreFocusOut: true,
 		});
 		if (actionsStr === undefined) {
 			return;
 		}
 
 		let stateStr = await vscode.window.showInputBox({
-      prompt: "Type state properties and it's type (default is dynamic)",
+			prompt: "Type state properties and it's type (default is dynamic)",
 			value: "",
 			placeHolder: "itemName: String, subItems: List<Item>, payload",
+			ignoreFocusOut: true,
 		});
 		if (stateStr === undefined) {
 			return;
@@ -62,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 		let effectPath = path.join(componentFolder, "effect.dart");
 		let pagePath = path.join(componentFolder, "page.dart");
 		let viewPath = path.join(componentFolder, "view.dart");
-		
+
 		await utils.mkdir(componentFolder);
 		await utils.writeFile(actionPath, templates.actionTemplate(boilerplateInfo));
 		await utils.writeFile(statePath, templates.stateTemplate(boilerplateInfo));
@@ -81,8 +84,13 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 }
 
-function parseNamesAndTypes(s: string): [string, string?][]{
-	return s.split(',').map(item => [item.split(':')[0].trim(), item.split(':')[1]]);
+function parseNamesAndTypes(s: string): [string, string?][] {
+	let namesAndTypes = s.split(',');
+	if (namesAndTypes.length === 1 && namesAndTypes[0].trim().length === 0) {
+		return [];
+	} else {
+		return namesAndTypes.map(item => [item.split(':')[0].trim(), item.split(':')[1] ? item.split(':')[1].trim() : item.split(':')[1]]);
+	}
 }
 
 async function getDefaultPath(): Promise<string> {
